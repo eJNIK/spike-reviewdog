@@ -12,7 +12,7 @@ jobs:
         uses: reviewdog/action-tflint@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+          reporter: github-pr-check
           fail_on_error: false
           filter_mode: added
           working_directory: terraform/
@@ -23,7 +23,7 @@ jobs:
         uses: reviewdog/action-tfsec@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
+          reporter: github-pr-check
           filter_mode: added
           fail_on_error: false
           working_directory: terraform/

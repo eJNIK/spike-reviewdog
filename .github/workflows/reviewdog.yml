@@ -16,6 +16,8 @@ jobs:
           fail_on_error: false
           filter_mode: added
           working_directory: terraform/
+          level: info
+          reviewdog_flags: -name="Terraform Linter"  # Custom name in comments
 
       # Run tfsec for Terraform security issues
       - name: Run tfsec
@@ -26,3 +28,19 @@ jobs:
           filter_mode: added
           fail_on_error: false
           working_directory: terraform/
+          level: warning
+          reviewdog_flags: -name="Security Scanner"  # Custom name in comments
+
+      # Optional: Post a summary comment
+      - name: Comment PR
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '👋 Terraform code review completed! Check inline comments for any issues found.'
+            })

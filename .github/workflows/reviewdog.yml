@@ -16,6 +16,7 @@ jobs:
           fail_on_error: false
           filter_mode: added
           working_directory: terraform/
+          level: info
 
       # Run tfsec for Terraform security issues
       - name: Run tfsec
@@ -26,3 +27,4 @@ jobs:
           filter_mode: added
           fail_on_error: false
           working_directory: terraform/
+          level: warning

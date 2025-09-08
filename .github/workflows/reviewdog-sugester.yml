@@ -1,0 +1,90 @@
+name: reviewdog-suggester
+on: [pull_request]
+
+jobs:
+  terraform-format:
+    name: Terraform Format Suggester
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      checks: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Setup Terraform
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: latest
+
+      # Format all Terraform files
+      - name: Format Terraform files
+        run: |
+          terraform fmt -recursive terraform/
+
+      # Suggest the formatting changes
+      - name: Suggest Terraform formatting
+        uses: reviewdog/action-suggester@v1
+        with:
+          tool_name: terraform-fmt
+          level: info
+          filter_mode: diff_context
+
+  # Example with multiple fixers
+  multi-suggester:
+    name: Multiple Auto-fixes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      checks: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Fix YAML files
+      - name: Install yamlfmt
+        run: |
+          go install github.com/google/yamlfmt/cmd/yamlfmt@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Format YAML files
+        run: yamlfmt .
+        continue-on-error: true
+
+      - name: Suggest YAML fixes
+        uses: reviewdog/action-suggester@v1
+        with:
+          tool_name: yamlfmt
+
+      # Fix JSON files
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Format JSON files
+        run: |
+          find . -name "*.json" -type f | while read file; do
+            jq . "$file" > "$file.tmp" && mv "$file.tmp" "$file" || true
+          done
+        continue-on-error: true
+
+      - name: Suggest JSON fixes
+        uses: reviewdog/action-suggester@v1
+        with:
+          tool_name: json-formatter
+
+      # Fix Markdown files
+      - name: Install prettier
+        run: npm install -g prettier
+
+      - name: Format Markdown files
+        run: prettier --write "**/*.md"
+        continue-on-error: true
+
+      - name: Suggest Markdown fixes
+        uses: reviewdog/action-suggester@v1
+        with:
+          tool_name: prettier

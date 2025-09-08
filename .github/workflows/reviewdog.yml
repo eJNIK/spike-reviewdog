@@ -7,8 +7,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run reviewdog
-        uses: reviewdog/action-shellcheck@v1
+      # Run tflint for Terraform code
+      - name: Run tflint
+        uses: reviewdog/action-tflint@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
+          fail_on_error: false
+          filter_mode: added
+          working_directory: terraform/
+
+      # Run tfsec for Terraform security issues
+      - name: Run tfsec
+        uses: reviewdog/action-tfsec@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          filter_mode: added
+          fail_on_error: false
+          working_directory: terraform/
